@@ -1,5 +1,5 @@
 const { handleResponse, handleError } = require('../utils/response-handler.util');
-const { getSlotsBy, getAvailableSlotByCarsize } = require('../controllers/slot-controller');
+const { getSlotsBy, getAvailableSlotByCarsize, checkIfSlotExist } = require('../controllers/slot-controller');
 const Joi = require('joi');
 const Slot = require('../models/slot.model');
 
@@ -25,8 +25,13 @@ class SlotService {
 			entryPoint: Joi.string().valid("A", "B", "C").required(),
 		});
 		const result = slotSchema.validate(req.body);
+		const slotId = result.value.slotId;
+		const isSlotExist = await checkIfSlotExist(slotId, res);
+
 		if (result.error)
 			return handleError(res, 400, { message: result.error.message });
+		if (isSlotExist.length !== 0)
+			return handleError(res, 400, { message: `${slotId} is existing` });
 		const newSlot = new Slot(result.value);
 		await newSlot.save();
 		return handleResponse(res, 200, { message: 'New Slot added.', data: result.value });

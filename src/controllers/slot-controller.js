@@ -67,6 +67,17 @@ async function getAvailableSlotByCarsize(carSize, res) {
 }
 
 /**
+ * @function checkIfSlotExist
+ * @param {string} slotId
+ * @param {object} res from Express
+ */
+async function checkIfSlotExist(slotId, res) {
+	return Slot.find({ slotId: slotId })
+		.then(data => data)
+		.catch(err => handleError(res, 500, err));
+}
+
+/**
  * @function updateSlotAvailability
  * @param {string} slotId
  * @param {string} slotStatus
@@ -81,4 +92,4 @@ async function updateSlotAvailability(slotId, slotStatus, res) {
 }
 
 
-module.exports = { getSlotsBy, getAvailableSlotByCarsize, updateSlotAvailability };
+module.exports = { getSlotsBy, getAvailableSlotByCarsize, updateSlotAvailability, checkIfSlotExist };
