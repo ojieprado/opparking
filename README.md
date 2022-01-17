@@ -24,17 +24,23 @@ created for company presentation only. Feel free to evaluate whatever errors enc
 ## Endpoints
 -  ### Slot Endpoints
 `GET /slot` - Get All Slots
-`GET /slot/:slotStatus` - Get All Slots by slotStatus
-`GET /slot/:slotStatus/:slotSize` - Get All Slots by slotStatus and slotSize
+
+`GET /slot/:entryPoint` - Get All Slots by slotStatus
+
+`GET /slot/:entryPoint/:slotSize` - Get All Slots by slotStatus and slotSize
+
 `POST /slot` - Insert new Slot
-`PATCH /slot` - Edit Slot Fee by slotSize
+
 -  ### Park Endpoints
 `GET /park` - Get All Parks
+
 `GET /park/:plateNo` - Get Parks By plateNo
+
 `POST /park` - Insert Park
-`POST /park/signup` - Signup for new Parker
+
 `POST /park/:plateNo/unpark` - Unpark the car
-`GET /park/available/:carSize` - Get the availability
+
+`GET /park/slot/:carSize` - Get the availability
 
 ## File Tree
 - **ooparking**
