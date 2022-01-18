@@ -11,22 +11,57 @@ const Slot = require('../models/slot.model');
  * @param {string} slotSize Slot Size e.g [SP, LP, MP]
  * @param {object} res from Express
  */
-async function getSlotsBy(entryPoint, slotSize, res) {
-	if (entryPoint && !slotSize) {
+async function getSlotsBy(entryPoint, slotSize, slotStatus, res) {
+	if (entryPoint !== null && slotSize === null && slotStatus === null) {
+		console.log('entryPoint !== null && slotSize === null && slotStatus === null')
 		return Slot.find({
-			entryPoint: entryPoint,
-			slotStatus: "available"
+			entryPoint: entryPoint.toUpperCase()
 		}).then(data => data).catch(err => handleError(res, 500, err));
-	} else if (entryPoint && slotSize) {
+
+	} else if (entryPoint !== null && slotSize !== null && slotStatus === null) {
+		console.log('entryPoint !== null && slotSize !== null && slotStatus === null')
 		return Slot.find({
-			entryPoint: entryPoint,
-			slotSize: slotSize,
-			slotStatus: "available"
+			entryPoint: entryPoint.toUpperCase(),
+			slotSize: slotSize.toUpperCase()
 		}).then(data => data).catch(err => handleError(res, 500, err));
+
+	} else if (entryPoint !== null && slotStatus !== null && slotSize === null) {
+		console.log('entryPoint !== null && slotStatus !== null && slotSize === null')
+		return Slot.find({
+			entryPoint: entryPoint.toUpperCase(),
+			slotStatus: slotStatus.toLowerCase()
+		}).then(data => data).catch(err => handleError(res, 500, err));
+
+	} else if (slotSize !== null && entryPoint === null && slotStatus === null) {
+		console.log('slotSize !== null && entryPoint === null && slotStatus === null')
+		return Slot.find({
+			slotSize: slotSize.toUpperCase(),
+		}).then(data => data).catch(err => handleError(res, 500, err));
+
+	} else if (slotSize !== null && slotStatus !== null && entryPoint === null) {
+		console.log('slotSize !== null && slotStatus !== null && entryPoint === null')
+		return Slot.find({
+			slotSize: slotSize.toUpperCase(),
+			slotStatus: slotStatus.toLowerCase()
+		}).then(data => data).catch(err => handleError(res, 500, err));
+
+	} else if (slotStatus !== null && slotSize === null && entryPoint === null) {
+		console.log('slotStatus !== null && slotSize === null && entryPoint === null')
+		return Slot.find({
+			slotStatus: slotStatus.toLowerCase()
+		}).then(data => data).catch(err => handleError(res, 500, err));
+
+	} else if (entryPoint !== null && slotSize !== null && slotStatus !== null) {
+		console.log('entryPoint !== null && slotSize !== null && slotStatus !== null')
+		return Slot.find({
+			entryPoint: entryPoint.toUpperCase(),
+			slotSize: slotSize.toUpperCase(),
+			slotStatus: slotStatus.toLowerCase()
+		}).then(data => data).catch(err => handleError(res, 500, err));
+
 	} else {
-		return Slot.find({
-			slotStatus: "available"
-		}).then(data => data).catch(err => handleError(res, 500, err));
+		console.log('default')
+		return Slot.find({}).then(data => data).catch(err => handleError(res, 500, err));
 	}
 }
 
@@ -36,7 +71,7 @@ async function getSlotsBy(entryPoint, slotSize, res) {
  * @param {object} res from Express
  */
 async function getAvailableSlotByCarsize(carSize, res) {
-	let carSizes = carSize.toUpperCase();
+	const carSizes = carSize.toUpperCase();
 	switch (carSizes) {
 		case 'S':
 			return Slot.find({

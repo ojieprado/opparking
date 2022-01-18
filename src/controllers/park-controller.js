@@ -12,7 +12,7 @@ const Slot = require('../models/slot.model');
  * @param {object} res from Express
  */
 async function getParksBy(plateNo, res) {
-	if (plateNo)
+	if (plateNo !== null)
 		return Park.find({ plateNumber: plateNo })
 			.then(data => data).catch(err => handleError(res, 500, err));
 	return Park.find({})
@@ -100,6 +100,17 @@ async function getParkingDetailById(id, res) {
 }
 
 /**
+ * @function getSlotFeeByCarsize
+ * @param {string} carSize Car Size
+ */
+async function getSlotFeeByCarsize(carSize) {
+	switch (carSize) {
+		case 'S': return 20;
+		case 'M': return 60;
+		case 'L': return 100;
+	}
+}
+/**
  * @function calculateParkFees
  * @param {object} park Parking details
  * @param {number} hourDifference actualParkOut - actualParkIn
@@ -107,50 +118,35 @@ async function getParkingDetailById(id, res) {
  */
 async function calculateParkFees(park, hourDifference, res) {
 	const id = park._id;
-	let minimumFee = (hourDifference <= 3 ? 40 : 5000);
+	const minimumFee = hourDifference <= 3 ? 40 : 5000;
+	const slotFee = await getSlotFeeByCarsize(park.carSize);
 	let additionalFee = 0;
-	let totalFees = 0;
+	let totalFee = 0;
 
 	if (hourDifference <= 3) {
 		additionalFee = 0;
-		totalFees = additionalFee + minimumFee;
+		totalFee = (additionalFee + minimumFee);
 	} else if (hourDifference > 3 && hourDifference < 24) {
-		if (park.carSize === 'S') {
-			additionalFee = (hourDifference - 3) * 20;
-			totalFees = additionalFee + minimumFee;
-		} else if (park.carSize === 'M') {
-			additionalFee = (hourDifference - 3) * 60;
-			totalFees = additionalFee + minimumFee;
-		} else if (park.carSize === 'L') {
-			additionalFee = (hourDifference - 3) * 100;
-			totalFees = additionalFee + minimumFee;
-		}
+		additionalFee = (hourDifference - 3) * slotFee;
+		totalFee = (additionalFee + minimumFee);
 	} else if (hourDifference >= 24) {
 		const hourToDay = Math.floor(hourDifference / 24);
 		const remainderHr = hourDifference % 24;
-		if (hourToDay <= 1) {
+		if (hourToDay < 1) {
 			additionalFee = 0;
-			totalFees = additionalFee + minimumFee;
+			totalFee = (additionalFee + minimumFee);
 		} else {
 			const minusDayOne = hourToDay - 1;
-			if (park.carSize === 'S') {
-				additionalFee = (minusDayOne * minimumFee) + (remainderHr * 20);
-				totalFees = additionalFee + minimumFee;
-			} else if (park.carSize === 'M') {
-				additionalFee = (minusDayOne * minimumFee) + (remainderHr * 60);
-				totalFees = additionalFee + minimumFee;
-			} else if (park.carSize === 'L') {
-				additionalFee = (minusDayOne * minimumFee) + (remainderHr * 100);
-				totalFees = additionalFee + minimumFee;
-			}
+			additionalFee = (minusDayOne * minimumFee) + (remainderHr * slotFee);
+			totalFee = (additionalFee + minimumFee);
 		}
 	}
-	Park.findOneAndUpdate({ _id: id }, {
+	Park.findByIdAndUpdate({ _id: id }, {
 		$set: {
 			actualParkHour: hourDifference,
 			minimumFee: minimumFee,
 			additionalFee: additionalFee,
-			totalFee: totalFees
+			totalFee: totalFee
 		}
 	})
 		.then(data => data)
@@ -161,11 +157,33 @@ async function calculateParkFees(park, hourDifference, res) {
 		.catch(err => handleError(res, 500, err));
 }
 
+/**
+ * @function updatePayment
+ * @param {string} parkId Park id
+ * @param {number} amount Amount
+ * @param {object} res from Express
+ */
+async function updatePayment(parkId, amount, res) {
+	Park.findByIdAndUpdate({ _id: parkId }, {
+		$set: {
+			isPaid: 'true',
+			paymentAmount: amount
+		}
+	})
+		.then(data => data)
+		.catch(err => handleError(res, 500, err));
+
+	return Park.findById({ _id: parkId })
+		.then(data => data)
+		.catch(err => handleError(res, 500, err));
+}
+
 module.exports = {
 	getParksBy,
 	getAvailableSlotBySlotId,
 	getAvailableSlotByPlateNo,
 	updateActualParkOut,
+	updatePayment,
 	checkIfParkedOut,
 	getParkingDetailById,
 	calculateParkFees,

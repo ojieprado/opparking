@@ -18,22 +18,18 @@ router.post('/user/login', asyncCatch(UserService.login));
 // Slot Services
 router.get('/slot', authentication, asyncCatch(SlotService.getSlotsBy));
 
-router.get('/slot/:entryPoint', authentication, asyncCatch(SlotService.getSlotsBy));
-
-router.get('/slot/:entryPoint/:slotSize', authentication, asyncCatch(SlotService.getSlotsBy));
-
 router.post('/slot', authentication, asyncCatch(SlotService.addSlot));
 
 
 // Park Services
 router.get('/park', authentication, asyncCatch(ParkingService.getParks));
 
-router.get('/park/:plateNo', authentication, asyncCatch(ParkingService.getParks));
-
 router.post('/park', authentication, asyncCatch(ParkingService.park));
 
 router.post('/park/:plateNo/unpark', authentication, asyncCatch(ParkingService.unpark));
 
 router.get('/park/slot/:carSize', authentication, asyncCatch(SlotService.getAvailableSlotByCarsize));
+
+// router.post('/park/payment', authentication, asyncCatch(ParkingService.payment));
 
 module.exports = router;

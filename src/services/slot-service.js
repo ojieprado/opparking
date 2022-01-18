@@ -10,9 +10,12 @@ const Slot = require('../models/slot.model');
 class SlotService {
 
 	static async getSlotsBy(req, res, _next) {
-		const entryPoint = req.params.entryPoint;
-		const slotSize = req.params.slotSize;
-		const slot = await getSlotsBy(entryPoint, slotSize, res);
+		const query = require('url').parse(req.url, true).query;
+		const entryPoint = query.entryPoint || null;
+		const slotSize = query.slotSize || null;
+		const slotStatus = query.slotStatus || null;
+
+		const slot = await getSlotsBy(entryPoint, slotSize, slotStatus, res);
 		if (!slot || slot.length === 0)
 			return handleError(res, 404, { message: `No Data Available` });
 		return handleResponse(res, 200, { message: `Data retrieved`, data: slot });
@@ -33,8 +36,9 @@ class SlotService {
 		if (isSlotExist.length !== 0)
 			return handleError(res, 400, { message: `${slotId} is existing` });
 		const newSlot = new Slot(result.value);
-		await newSlot.save();
-		return handleResponse(res, 200, { message: 'New Slot added.', data: result.value });
+		await newSlot.save()
+			.then(data => handleResponse(res, 200, { message: 'New Slot added.', data }))
+			.catch(err => handleError(res, 500, 'Error encountered while saving', err));
 	}
 
 	static async getAvailableSlotByCarsize(req, res, _next) {

@@ -50,6 +50,16 @@ const ParkSchema = new mongoose.Schema({
 		required: true,
 		default: 0
 	}
+	// isPaid: {
+	// 	type: Boolean,
+	// 	required: true,
+	// 	default: false
+	// },
+	// paymentAmount: {
+	// 	type: Number,
+	// 	required: true,
+	// 	default: 0
+	// }
 });
 
 module.exports = mongoose.model('Park', ParkSchema);
